@@ -8,6 +8,7 @@
 #include <mutex>
 #include <thread>
 #include "SessionStore.h"
+#include "resource.h"
 
 namespace {
 constexpr UINT kResults = WM_APP + 1;
@@ -29,6 +30,15 @@ public:
 protected:
     afx_msg int OnCreate(LPCREATESTRUCT create) {
         if (CFrameWnd::OnCreate(create) == -1) return -1;
+        const UINT dpi = GetDpiForWindow(m_hWnd);
+        const auto loadIcon = [dpi](int widthMetric, int heightMetric) {
+            return static_cast<HICON>(::LoadImageW(AfxGetResourceHandle(),
+                MAKEINTRESOURCEW(IDI_APP_ICON), IMAGE_ICON,
+                GetSystemMetricsForDpi(widthMetric, dpi),
+                GetSystemMetricsForDpi(heightMetric, dpi), LR_SHARED));
+        };
+        SetIcon(loadIcon(SM_CXICON, SM_CYICON), TRUE);
+        SetIcon(loadIcon(SM_CXSMICON, SM_CYSMICON), FALSE);
         font_.CreatePointFont(100, L"Microsoft YaHei UI");
         titleList_.Create(L"主会话文件（按修改时间从新到旧）", WS_CHILD | WS_VISIBLE, {}, this);
         titlePreview_.Create(L"前 5 条用户 / 助手文字消息", WS_CHILD | WS_VISIBLE, {}, this);

@@ -38,7 +38,9 @@
     <Manifest><AdditionalManifestFiles>$(ProjectDir)src\app.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles></Manifest>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="src\Main.cpp"/><ClCompile Include="src\SessionStore.cpp"/></ItemGroup>
-  <ItemGroup><ClInclude Include="src\SessionStore.h"/><ClInclude Include="third_party\nlohmann\json.hpp"/></ItemGroup>
+  <ItemGroup><ClInclude Include="src\SessionStore.h"/><ClInclude Include="src\resource.h"/><ClInclude Include="third_party\nlohmann\json.hpp"/></ItemGroup>
+  <ItemGroup><ResourceCompile Include="src\app.rc"/></ItemGroup>
+  <ItemGroup><Image Include="res\app.ico"/></ItemGroup>
   <ItemGroup><Manifest Include="src\app.manifest"/></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
 </Project>

@@ -40,6 +40,8 @@ MFC 和 C/C++ 运行库均静态链接；Release 程序无需另外安装 Visual
 
 `build.ps1` 编译解决方案并运行核心测试。输出位于 `bin\x64\Debug` 和 `bin\x64\Release`。界面测试需要当前登录的 Windows 桌面会话。
 
+程序图标统一用于窗口标题栏、任务栏和资源管理器中的 EXE，内含 16–256 像素的 10 种尺寸。图标已嵌入 EXE，无需随程序分发图片。修改图案后可运行 `tools\generate-icon.ps1` 重新生成 `res\app.ico` 和预览图 `res\app.png`，再重新编译程序。
+
 ## 测试与文件结构
 
 核心测试和界面测试均创建唯一临时目录，清理前核对路径。删除测试不会操作真实 Codex 会话。
@@ -53,6 +55,7 @@ MFC 和 C/C++ 运行库均静态链接；Release 程序无需另外安装 Visual
 指定目录后，该目录成为扫描与删除范围。正常使用不需要此参数。
 
 - `src\Main.cpp`：MFC 界面、后台扫描与预览、结果版本检查。
+- `src\app.rc`、`src\resource.h`、`res\app.ico`：程序图标资源。
 - `src\SessionStore.cpp`：扫描、UTF-8 消息提取、文件句柄删除与路径核对。
 - `tests\SessionStoreTests.cpp`：核心测试。
 - `tools\test-ui.ps1`：仅针对测试进程的界面自动化。
