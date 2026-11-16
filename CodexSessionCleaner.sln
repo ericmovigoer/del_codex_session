@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "CodexSessionCleaner", "CodexSessionCleaner.vcxproj", "{A8DE36C3-DA65-4361-BD13-549779CADC29}"
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "SessionStoreTests", "tests\SessionStoreTests.vcxproj", "{639C8A56-639F-421A-BAB5-BBB9365BC45D}"
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|x64 = Debug|x64
+        Release|x64 = Release|x64
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {A8DE36C3-DA65-4361-BD13-549779CADC29}.Debug|x64.ActiveCfg = Debug|x64
+        {A8DE36C3-DA65-4361-BD13-549779CADC29}.Debug|x64.Build.0 = Debug|x64
+        {A8DE36C3-DA65-4361-BD13-549779CADC29}.Release|x64.ActiveCfg = Release|x64
+        {A8DE36C3-DA65-4361-BD13-549779CADC29}.Release|x64.Build.0 = Release|x64
+        {639C8A56-639F-421A-BAB5-BBB9365BC45D}.Debug|x64.ActiveCfg = Debug|x64
+        {639C8A56-639F-421A-BAB5-BBB9365BC45D}.Debug|x64.Build.0 = Debug|x64
+        {639C8A56-639F-421A-BAB5-BBB9365BC45D}.Release|x64.ActiveCfg = Release|x64
+        {639C8A56-639F-421A-BAB5-BBB9365BC45D}.Release|x64.Build.0 = Release|x64
+    EndGlobalSection
+EndGlobal
