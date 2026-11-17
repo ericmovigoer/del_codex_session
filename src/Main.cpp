@@ -12,12 +12,24 @@
 
 namespace {
 constexpr UINT kResults = WM_APP + 1;
-constexpr UINT kList = 1001, kPreview = 1002, kRefresh = 1003, kDelete = 1004, kPath = 1005;
+constexpr UINT kList = 1001, kPreview = 1002, kRefresh = 1003, kDelete = 1004, kPath = 1005, kSettings = 1006;
 struct Result {
     bool scan = false;
     std::uint64_t version = 0;
     sessions::ScanResult listing;
     sessions::PreviewResult preview;
+};
+
+class SettingsDialog : public CDialog {
+public:
+    explicit SettingsDialog(int size, CWnd* parent) : CDialog(IDD_SETTINGS, parent), size_(size) {}
+    int size_;
+protected:
+    void DoDataExchange(CDataExchange* dx) override {
+        CDialog::DoDataExchange(dx);
+        DDX_Text(dx, IDC_FONT_SIZE, size_);
+        DDV_MinMaxInt(dx, size_, 8, 48);
+    }
 };
 
 class SessionWindow : public CFrameWnd {
@@ -48,6 +60,7 @@ protected:
             ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL, {}, this, kPreview);
         preview_.SetLimitText(0x7ffffffe);
         refresh_.Create(L"刷新", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, {}, this, kRefresh);
+        settings_.Create(L"设置", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, {}, this, kSettings);
         remove_.Create(L"删除选中会话…", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, {}, this, kDelete);
         path_.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_READONLY | ES_AUTOHSCROLL,
             {}, this, kPath);
@@ -56,7 +69,8 @@ protected:
         const UINT indicators[] = { ID_SEPARATOR };
         status_.SetIndicators(indicators, 1);
         for (CWnd* control : std::initializer_list<CWnd*>{ &titleList_, &titlePreview_, &list_, &preview_,
-             &refresh_, &remove_, &path_, &hint_, &status_ }) control->SetFont(&font_);
+             &refresh_, &remove_, &settings_, &path_, &hint_, &status_ }) control->SetFont(&font_);
+        ApplyPreviewFont(std::clamp(AfxGetApp()->GetProfileInt(L"设置", L"PreviewFontSize", 10), 8u, 48u));
         remove_.EnableWindow(FALSE);
         scanThread_ = std::thread([this] { ScanWorker(); });
         previewThread_ = std::thread([this] { PreviewWorker(); });
@@ -71,7 +85,8 @@ protected:
         const int bottom = cy - scale(26), split = std::max(scale(240), cx * 37 / 100);
         refresh_.MoveWindow(pad, pad, scale(90), row);
         remove_.MoveWindow(pad + scale(104), pad, scale(160), row);
-        hint_.MoveWindow(pad + scale(280), pad + scale(4), std::max(0, cx - scale(308)), row);
+        settings_.MoveWindow(pad + scale(280), pad, scale(80), row);
+        hint_.MoveWindow(pad + scale(370), pad + scale(4), std::max(0, cx - scale(398)), row);
         titleList_.MoveWindow(pad, pad + row + gap, split - pad - gap, row);
         titlePreview_.MoveWindow(split, pad + row + gap, std::max(0, cx - split - pad), row);
         const int top = pad + 2 * row + gap, height = std::max(0, bottom - row - gap - top);
@@ -93,6 +108,24 @@ protected:
     void SetStatus(const std::wstring& message) {
         const std::wstring text = L"主会话数：" + std::to_wstring(files_.size()) + L"    " + message;
         status_.SetPaneText(0, text.c_str());
+    }
+    bool ApplyPreviewFont(int size) {
+        CFont next;
+        if (!next.CreatePointFont(size * 10, L"Microsoft YaHei UI")) return false;
+        preview_.SetFont(&next);
+        previewFont_.DeleteObject();
+        previewFont_.Attach(static_cast<HFONT>(next.Detach()));
+        previewFontSize_ = size;
+        return true;
+    }
+    afx_msg void OnSettings() {
+        SettingsDialog dialog(previewFontSize_, this);
+        if (dialog.DoModal() == IDOK) {
+            if (ApplyPreviewFont(dialog.size_))
+                AfxGetApp()->WriteProfileInt(L"设置", L"PreviewFontSize", dialog.size_);
+            else
+                MessageBox(L"无法创建字体，请重试。", L"设置", MB_OK | MB_ICONERROR);
+        }
     }
     afx_msg void OnRefresh() {
         ++previewVersion_;
@@ -267,11 +300,12 @@ protected:
 private:
     sessions::fs::path root_;
     std::vector<sessions::File> files_;
-    CFont font_;
+    CFont font_, previewFont_;
+    int previewFontSize_ = 10;
     CStatic titleList_, titlePreview_, hint_;
     CListBox list_;
     CEdit preview_, path_;
-    CButton refresh_, remove_;
+    CButton refresh_, remove_, settings_;
     CStatusBar status_;
     std::atomic<bool> stopping_{ false };
     std::atomic<std::uint64_t> scanVersion_{ 0 }, previewVersion_{ 0 };
@@ -290,6 +324,7 @@ BEGIN_MESSAGE_MAP(SessionWindow, CFrameWnd)
     ON_WM_DESTROY()
     ON_MESSAGE(WM_DPICHANGED, OnDpiChanged)
     ON_MESSAGE(kResults, OnResults)
+    ON_COMMAND(kSettings, OnSettings)
     ON_COMMAND(kRefresh, OnRefresh)
     ON_COMMAND(kDelete, OnDelete)
     ON_LBN_SELCHANGE(kList, OnSelect)
@@ -298,6 +333,7 @@ END_MESSAGE_MAP()
 class SessionApp : public CWinApp {
     BOOL InitInstance() override {
         CWinApp::InitInstance();
+        SetRegistryKey(L"CodexSessionCleaner");
         auto root = sessions::DefaultRoot();
         int count = 0;
         LPWSTR* args = CommandLineToArgvW(GetCommandLineW(), &count);
@@ -321,3 +357,4 @@ class SessionApp : public CWinApp {
     }
 } app;
 }
+

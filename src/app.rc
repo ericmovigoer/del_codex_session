@@ -1,3 +1,16 @@
+#pragma code_page(65001)
+#include <windows.h>
 #include "resource.h"
 
 IDI_APP_ICON ICON "../res/app.ico"
+
+IDD_SETTINGS DIALOGEX 0, 0, 190, 75
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "设置"
+FONT 9, "Microsoft YaHei UI"
+BEGIN
+    LTEXT "预览字体大小（磅，8-48）：", -1, 10, 14, 125, 12
+    EDITTEXT IDC_FONT_SIZE, 140, 12, 35, 14, ES_NUMBER | WS_TABSTOP
+    DEFPUSHBUTTON "确定", IDOK, 65, 48, 50, 14
+    PUSHBUTTON "取消", IDCANCEL, 125, 48, 50, 14
+END
